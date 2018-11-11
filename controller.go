@@ -16,7 +16,7 @@ type errResponse struct {
 }
 
 func DataController(w http.ResponseWriter, _ *http.Request) {
-	sendResponse(okResponse{Ok: true, Data: "Hello, World"}, w)
+	sendResponse("Hello, World!", w)
 }
 
 func sendResponse(data interface{}, w http.ResponseWriter) {
