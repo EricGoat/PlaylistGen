@@ -5,7 +5,9 @@
     "types": [
       "jasmine",
       "node"
-    ]
+    ],
+    "experimentalDecorators": true
+
   },
   "files": [
     "test.ts",
