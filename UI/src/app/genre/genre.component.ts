@@ -13,7 +13,7 @@ const BASE_GENRES_ENDPOINT = 'http://localhost:8000/api/genres';
 })
 export class GenreComponent implements OnInit {
   code: string;
-  genres: string[];
+  genres: string[] = ['hello', 'world'];
 
   constructor(private route: ActivatedRoute) {}
 
@@ -25,11 +25,10 @@ export class GenreComponent implements OnInit {
   }
 
   private getGenres() {
-    axios.request<ServerResponse<string>>({
+    axios.request<ServerResponse<string[]>>({
       url: this.buildGenresUrl()
     }).then(resp => {
-      console.log(resp);
-      this.genres = [];
+      this.genres = resp.data.data;
     });
   }
 

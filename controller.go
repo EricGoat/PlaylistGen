@@ -37,12 +37,17 @@ func GenresController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := GetAccessToken(code, redirectURI)
+	accessToken, err := GetAccessToken(code, redirectURI)
 	if err != nil {
 		sendError(err, w)
 	}
 
-	sendResponse("Hello, World!", w)
+	genres, err := GetGenres(accessToken)
+	if err != nil {
+		sendError(err, w)
+	}
+
+	sendResponse(genres, w)
 }
 
 func sendResponse(data interface{}, w http.ResponseWriter) {
