@@ -1,4 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import axios from 'axios';
+import { ServerResponse } from '../models/server-response.model';
+import { redirectUri } from '../common';
+
+const BASE_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 
 @Component({
   selector: 'app-page',
@@ -6,18 +11,23 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./page.component.css']
 })
 export class PageComponent implements OnInit {
+  clientId: string;
 
-  page = {
-    title: 'Home',
-    subtitle: 'Welcome Home',
-    content: 'Some content'
-  };
   constructor() { }
 
   ngOnInit() {
+    axios.request<ServerResponse<string>>({
+      url: 'http://localhost:8000/api/client_id'
+    }).then(resp => {
+      this.clientId = resp.data.data;
+    });
   }
 
   redirectToSpotify() {
-    window.location.href = "https://accounts.spotify.com/authorize?client_id=725c53094c0449379beb24431dda70cf&response_type=code&redirect_uri=http%3A%2F%2F467cf652.ngrok.io%2Fgenres"
+    window.location.href = this.buildAuthorizationUrl();
+  }
+
+  private buildAuthorizationUrl(): string {
+    return BASE_AUTHORIZE_URL + '?client_id=' + this.clientId + '&response_type=code&redirect_uri=' + redirectUri;
   }
 }
