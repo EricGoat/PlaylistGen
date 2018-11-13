@@ -7,9 +7,9 @@ import (
 
 const port = "8000"
 
-type Server struct{}
+type server struct{}
 
-func (s *Server) start() {
+func (s *server) start() {
 	fmt.Printf("Web server started on port %s\n", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 	if err != nil {
@@ -17,11 +17,11 @@ func (s *Server) start() {
 	}
 }
 
-func (s *Server) addRoute(path string, handler http.HandlerFunc) {
+func (s *server) addRoute(path string, handler http.HandlerFunc) {
 	http.HandleFunc(path, s.log(handler))
 }
 
-func (s *Server) log(h http.HandlerFunc) http.HandlerFunc {
+func (s *server) log(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("%s: %s\n", r.Method, r.URL)
 		h(w, r)

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -16,26 +17,49 @@ type errResponse struct {
 	Error string `json:"error"`
 }
 
-func (s *Server) handleGenres() http.HandlerFunc {
+func (s *server) handleSongs() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		code := r.URL.Query().Get("code")
-		if code == "" {
-			sendError(errors.New("code parameter is blank"), w)
-			return
-		}
-
-		redirectURI := r.URL.Query().Get("redirect_uri")
-		if redirectURI == "" {
-			sendError(errors.New("redirect_uri parameter is blank"), w)
-			return
-		}
-
-		accessToken, err := GetAccessToken(code, redirectURI)
+		accessToken, err := getAccessTokenFromRequest(r)
 		if err != nil {
 			sendError(err, w)
+			return
 		}
 
-		genres, err := GetGenres(accessToken)
+		genre := r.URL.Query().Get("genre")
+		if genre == "" {
+			sendError(errors.New("genre parameter is blank"), w)
+			return
+		}
+
+		duration := r.URL.Query().Get("duration")
+		if duration == "" {
+			sendError(errors.New("duration parameter is blank"), w)
+			return
+		}
+
+		songs, err := getSongIDs(genre, duration, accessToken)
+		if err != nil {
+			sendError(err, w)
+			return
+		}
+
+		for _, song := range songs {
+			fmt.Println(song)
+		}
+
+		sendResponse("NOT IMPLEMENTED", w)
+	}
+}
+
+func (s *server) handleGenres() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		accessToken, err := getAccessTokenFromRequest(r)
+		if err != nil {
+			sendError(err, w)
+			return
+		}
+
+		genres, err := getGenres(accessToken)
 		if err != nil {
 			sendError(err, w)
 		}
@@ -44,10 +68,29 @@ func (s *Server) handleGenres() http.HandlerFunc {
 	}
 }
 
-func (s *Server) handleClientID() http.HandlerFunc {
+func (s *server) handleClientID() http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		sendResponse(ClientID, w)
 	}
+}
+
+func getAccessTokenFromRequest(r *http.Request) (AccessToken, error) {
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		return AccessToken{}, errors.New("code parameter is blank")
+	}
+
+	redirectURI := r.URL.Query().Get("redirect_uri")
+	if redirectURI == "" {
+		return AccessToken{}, errors.New("redirect_uri parameter is blank")
+	}
+
+	accessToken, err := GetAccessToken(code, redirectURI)
+	if err != nil {
+		return AccessToken{}, err
+	}
+
+	return accessToken, nil
 }
 
 func sendResponse(data interface{}, w http.ResponseWriter) {

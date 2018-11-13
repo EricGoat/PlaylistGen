@@ -1,7 +1,7 @@
 package main
 
 func main() {
-	server := Server{}
+	server := server{}
 	server.routes()
 	server.start()
 }
