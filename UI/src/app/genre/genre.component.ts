@@ -13,7 +13,7 @@ const BASE_GENRES_ENDPOINT = 'http://localhost:8000/api/genres';
 })
 export class GenreComponent implements OnInit {
   code: string;
-  genres: string[] = ['hello', 'world'];
+  genres: string[] = [];
 
   constructor(private route: ActivatedRoute) {}
 

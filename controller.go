@@ -16,38 +16,38 @@ type errResponse struct {
 	Error string `json:"error"`
 }
 
-func DataController(w http.ResponseWriter, _ *http.Request) {
-	sendResponse("Hello, World!", w)
+func (s *Server) handleGenres() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		code := r.URL.Query().Get("code")
+		if code == "" {
+			sendError(errors.New("code parameter is blank"), w)
+			return
+		}
+
+		redirectURI := r.URL.Query().Get("redirect_uri")
+		if redirectURI == "" {
+			sendError(errors.New("redirect_uri parameter is blank"), w)
+			return
+		}
+
+		accessToken, err := GetAccessToken(code, redirectURI)
+		if err != nil {
+			sendError(err, w)
+		}
+
+		genres, err := GetGenres(accessToken)
+		if err != nil {
+			sendError(err, w)
+		}
+
+		sendResponse(genres, w)
+	}
 }
 
-func ClientIDController(w http.ResponseWriter, _ *http.Request) {
-	sendResponse(ClientID, w)
-}
-
-func GenresController(w http.ResponseWriter, r *http.Request) {
-	code := r.URL.Query().Get("code")
-	if code == "" {
-		sendError(errors.New("code parameter is blank"), w)
-		return
+func (s *Server) handleClientID() http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		sendResponse(ClientID, w)
 	}
-
-	redirectURI := r.URL.Query().Get("redirect_uri")
-	if redirectURI == "" {
-		sendError(errors.New("redirect_uri parameter is blank"), w)
-		return
-	}
-
-	accessToken, err := GetAccessToken(code, redirectURI)
-	if err != nil {
-		sendError(err, w)
-	}
-
-	genres, err := GetGenres(accessToken)
-	if err != nil {
-		sendError(err, w)
-	}
-
-	sendResponse(genres, w)
 }
 
 func sendResponse(data interface{}, w http.ResponseWriter) {
